@@ -1,6 +1,5 @@
 
 //THREEJS RELATED VARIABLES 
-var score = 0;
 let currentMode = "mcq"; // or "speech"
 
 var questions = [
@@ -20,6 +19,8 @@ var questions = [
 	  correct: "triangle"
 	}
   ];
+  var currentQuestionIndex = 0;
+
   
   const speechQuestions = [
 	{
@@ -28,30 +29,49 @@ var questions = [
 	}
   ];
   
-  
-  var currentQuestionIndex = 0;
-  function showQuestion(index) {
-	const q = questions[index];
-  
-	document.querySelector("#question-panel p").textContent = q.text;
-  
-	const ul = document.querySelector("#question-panel ul");
-	ul.innerHTML = "";
-  
-	document.getElementById("speech-btn").style.display = "none";
-	document.getElementById("speech-result").textContent = "";
-  
-	q.answers.forEach(answer => {
-	  const li = document.createElement("li");
-	  const btn = document.createElement("button");
-	  btn.textContent = answer;
-	  btn.onclick = () => checkAnswer(answer.toLowerCase());
-	  li.appendChild(btn);
-	  ul.appendChild(li);
-	});
-  
-	document.getElementById("feedback").textContent = "";
-  }
+  function initSpeechRecognition(correctAnswer) {
+	const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+	const resultDisplay = document.getElementById("speech-result");
+
+	if (!SpeechRecognition) {
+	  resultDisplay.textContent = "Speech recognition not supported 😞";
+	  return;
+	}
+
+	const recognition = new SpeechRecognition();
+	recognition.lang = "en-US";
+	recognition.interimResults = false;
+	recognition.continuous = false;
+
+	resultDisplay.textContent = "🎙 Listening...";
+	//to be fixed
+	recognition.onresult = (event) => {
+	  const spoken = event.results[0][0].transcript.trim().toLowerCase();
+	  resultDisplay.textContent = `You said: "${spoken}"`;
+
+	  if (spoken === correctAnswer.toLowerCase()) {
+		showFeedback('Correct! 🎉', true);
+		checkAnswer(spoken); // ✅ pass what the user actually said
+	  } else {
+		showFeedback('Nope! Try again.', false);
+	  }
+	  
+	};
+
+	recognition.onerror = (event) => {
+	  resultDisplay.textContent = `Error: ${event.error}`;
+	  resultDisplay.style.color = "red";
+	};
+
+	recognition.onend = () => {
+	  setTimeout(() => {
+		resultDisplay.textContent = "";
+	  }, 2000);
+	};
+
+	recognition.start();
+}
+
   
   function nextQuestion() {
 	if (currentMode === "mcq") {
@@ -76,7 +96,27 @@ var questions = [
 	allowCatToPlay = false;
   }
   
-  
+  function showFeedback(message, isCorrect) {
+  // Remove existing feedback popup if any
+  const existingPopup = document.querySelector('.feedback-popup');
+  if (existingPopup) {
+    existingPopup.remove();
+  }
+
+  // Create new feedback popup
+  const popup = document.createElement('div');
+  popup.className = 'feedback-popup';
+  popup.style.color = isCorrect ? '#4CAF50' : '#F44336';
+  popup.textContent = message;
+  document.body.appendChild(popup);
+
+  // Remove popup after animation
+  setTimeout(() => {
+    popup.remove();
+  }, 2000);
+}
+
+
   function prevQuestion() {
 	if (currentMode === "mcq" && currentQuestionIndex > 0) {
 	  currentQuestionIndex--;
@@ -574,13 +614,14 @@ function launchConfetti() {
   function updateScoreDisplay() {
 	document.getElementById('score-display').textContent = `Score: ${score}`;
   }
+
+
+  //this
   function checkAnswer(selected) {
-	const correctAnswer = getCurrentCorrectAnswer(); // Handles both MCQ & speech
-	const feedback = document.getElementById('feedback');
+	const correctAnswer = getCurrentCorrectAnswer().toLowerCase();
   
-	if (selected === correctAnswer.toLowerCase()) {
-	  feedback.textContent = 'Correct! 🎉';
-	  feedback.style.color = 'green';
+	if (selected === correctAnswer) {
+	  showFeedback('Correct! 🎉', true);
 	  allowCatToPlay = true;
 	  score++;
 	  updateScoreDisplay();
@@ -589,55 +630,15 @@ function launchConfetti() {
 		hero.clap();
 		hero.celebrate();
 	  }
+  
 	} else {
-	  feedback.textContent = 'Nope! Try again.';
-	  feedback.style.color = 'red';
+	  showFeedback('Nope! Try again.', false);
 	  allowCatToPlay = false;
 	}
   }
   
-  function initSpeechRecognition(correctAnswer) {
-	const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-	const resultDisplay = document.getElementById("speech-result");
+
   
-	if (!SpeechRecognition) {
-	  resultDisplay.textContent = "Speech recognition not supported 😞";
-	  return;
-	}
-  
-	const recognition = new SpeechRecognition();
-	recognition.lang = "en-US";
-	recognition.interimResults = false;
-	recognition.continuous = false;
-  
-	resultDisplay.textContent = "🎙 Listening...";
-  
-	recognition.onresult = (event) => {
-	  const spoken = event.results[0][0].transcript.trim().toLowerCase();
-	  resultDisplay.textContent = `You said: "${spoken}"`;
-  
-	  if (spoken === correctAnswer.toLowerCase()) {
-		resultDisplay.style.color = "green";
-		checkAnswer(correctAnswer); // 🎯 trigger correct flow
-	  } else {
-		resultDisplay.style.color = "red";
-		document.getElementById("feedback").textContent = "Nope! Try again.";
-	  }
-	};
-  
-	recognition.onerror = (event) => {
-	  resultDisplay.textContent = `Error: ${event.error}`;
-	  resultDisplay.style.color = "red";
-	};
-  
-	recognition.onend = () => {
-	  setTimeout(() => {
-		resultDisplay.textContent = "";
-	  }, 2000);
-	};
-  
-	recognition.start();
-  }
   function showSpeechQuestion(index) {
 	const q = speechQuestions[index];
   
@@ -650,7 +651,6 @@ function launchConfetti() {
 	// Show speech button
 	document.getElementById("speech-btn").style.display = "inline-block";
 	document.getElementById("speech-result").textContent = "";
-	document.getElementById("feedback").textContent = "";
   
 	document.getElementById("speech-btn").onclick = () => initSpeechRecognition(q.correct);
   }
