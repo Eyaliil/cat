@@ -517,10 +517,84 @@ Cat = function(){
     }
   } );
 
-  Cat.prototype.celebrate = function() {
-    const tl = new TimelineMax();
-    tl.to(this.threeGroup.rotation, 0.2, { y: "+=0.5", repeat: 3, yoyo: true });
+  Cat.prototype.clap = function() {
+    const _this = this;
+  
+    const raiseDuration = 0.25;
+    const clapDuration = 0.08;
+    const armLiftAngle = -Math.PI / 1.8;
+    const forearmAngle = -Math.PI / 1.4;
+    const footRotation = -Math.PI / 2;
+  
+    // Raise arms and prep for clap
+    TweenMax.to(this.rightShoulder.rotation, raiseDuration, { y: 0 });
+    TweenMax.to(this.leftShoulder.rotation, raiseDuration, { y: 0 });
+  
+    TweenMax.to(this.rightArm.rotation, raiseDuration, { x: armLiftAngle });
+    TweenMax.to(this.leftArm.rotation, raiseDuration, { x: armLiftAngle });
+  
+    TweenMax.to(this.rightForeArm.rotation, raiseDuration, { x: forearmAngle });
+    TweenMax.to(this.leftForeArm.rotation, raiseDuration, { x: forearmAngle });
+  
+    TweenMax.to(this.rightFoot.rotation, raiseDuration, { x: footRotation });
+    TweenMax.to(this.leftFoot.rotation, raiseDuration, { x: footRotation });
+  
+    const clapTimes = 4;
+    const delay = raiseDuration;
+  
+    for (let i = 0; i < clapTimes; i++) {
+      const offset = 0.3 * (i % 2 === 0 ? 1 : -1);
+  
+      TweenMax.to(this.rightShoulder.position, clapDuration, {
+        x: -6 + offset,
+        delay: delay + i * clapDuration * 2,
+        yoyo: true,
+        repeat: 1
+      });
+  
+      TweenMax.to(this.leftShoulder.position, clapDuration, {
+        x: 6 - offset,
+        delay: delay + i * clapDuration * 2,
+        yoyo: true,
+        repeat: 1
+      });
+    }
+  
+    // Reset arms to resting pose
+    const resetDelay = delay + clapTimes * clapDuration * 2;
+  
+    TweenMax.to(this.rightShoulder.position, 0.2, { x: -6, delay: resetDelay });
+    TweenMax.to(this.leftShoulder.position, 0.2, { x: 6, delay: resetDelay });
+  
+    TweenMax.to(this.rightArm.rotation, 0.3, { x: 0, delay: resetDelay });
+    TweenMax.to(this.leftArm.rotation, 0.3, { x: 0, delay: resetDelay });
+  
+    TweenMax.to(this.rightForeArm.rotation, 0.3, { x: 0, delay: resetDelay });
+    TweenMax.to(this.leftForeArm.rotation, 0.3, { x: 0, delay: resetDelay });
   };
+  
+  Cat.prototype.celebrate = function () {
+    const jumpHeight = 60;
+    const jumpDuration = 0.25;
+    const tl = new TimelineMax();
+  
+    for (let i = 0; i < 3; i++) {
+      tl.to(this.threeGroup.position, jumpDuration, {
+        y: `+=${jumpHeight}`,
+        ease: Power2.easeOut,
+        onStart: launchConfetti // 🎉 Trigger confetti at each jump top
+      });
+      tl.to(this.threeGroup.position, jumpDuration, {
+        y: `-=${jumpHeight}`,
+        ease: Power2.easeIn
+      });
+    }
+  };
+  
+  
+  
+  
+  
   
 }
 
@@ -536,6 +610,8 @@ Cat.prototype.updateTail = function(t){
   }
 }
 
+
+ 
 Cat.prototype.interactWithBall = function(ballPos){
   var bDir = ballPos.clone().sub(this.shouldersPosition.clone());
   var isInDistance = bDir.length() < (this.armHeight*2 + this.handHeight + 8)*1.3;

@@ -23,8 +23,11 @@ var deltaTime = 0;
 //3D OBJECTS VARIABLES
 
 var hero;
+var score = 0;
+
 
 //INIT THREE JS, SCREEN AND MOUSE EVENTS
+var allowCatToPlay = false;
 
 function initScreenAnd3D() {
   
@@ -47,7 +50,7 @@ function initScreenAnd3D() {
   camera.position.x = 0;
   camera.position.z = 300;
   camera.position.y = 250;
-  camera.lookAt(new THREE.Vector3(0, 60, 0));
+  camera.lookAt(new THREE.Vector3(0, -50, 0));
 
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setPixelRatio( window.devicePixelRatio );
@@ -373,13 +376,16 @@ function loop(){
   t+=.05;
   hero.updateTail(time * 2);
   
-  if (t>1){
-    var ballPos = getBallPos();
-    ball.update(ballPos.x,ballPos.y, ballPos.z);
-    ball.receivePower(hero.transferPower, deltaTime * 80);
-    hero.interactWithBall(ball.body.position);
-    
+  if (t > 1) {
+	var ballPos = getBallPos();
+	ball.update(ballPos.x, ballPos.y, ballPos.z);
+	ball.receivePower(hero.transferPower, deltaTime * 80);
+  
+	if (allowCatToPlay) {
+	  hero.interactWithBall(ball.body.position);
+	}
   }
+  
 
   requestAnimationFrame(loop);
 }
@@ -416,7 +422,58 @@ function init(event){
   loop();
 }
 
-function checkAnswer(selected) {
+function launchConfetti() {
+	const confettiGroup = new THREE.Group();
+	scene.add(confettiGroup);
+  
+	const colors = [0xff5f5f, 0xffd95f, 0x8aff5f, 0x5fdfff, 0xbf5fff];
+	const count = 30;
+  
+	for (let i = 0; i < count; i++) {
+	  const geometry = new THREE.PlaneGeometry(2, 6);
+	  const material = new THREE.MeshBasicMaterial({
+		color: colors[Math.floor(Math.random() * colors.length)],
+		side: THREE.DoubleSide
+	  });
+	  const confetti = new THREE.Mesh(geometry, material);
+	  confetti.position.set(
+		hero.threeGroup.position.x + (Math.random() - 0.5) * 30,
+		hero.threeGroup.position.y + 80,
+		hero.threeGroup.position.z + (Math.random() - 0.5) * 30
+	  );
+	  confetti.rotation.set(Math.random(), Math.random(), Math.random());
+	  confetti.velocity = {
+		x: (Math.random() - 0.5) * 0.5,
+		y: -0.5 - Math.random() * 1,
+		z: (Math.random() - 0.5) * 0.5
+	  };
+	  confettiGroup.add(confetti);
+	}
+  
+	// Animate falling confetti for 2 seconds
+	const start = performance.now();
+	function animateConfetti(time) {
+	  const elapsed = time - start;
+  
+	  confettiGroup.children.forEach((confetti) => {
+		confetti.position.x += confetti.velocity.x;
+		confetti.position.y += confetti.velocity.y;
+		confetti.position.z += confetti.velocity.z;
+		confetti.rotation.x += 0.1;
+		confetti.rotation.y += 0.1;
+	  });
+  
+	  if (elapsed < 2000) {
+		requestAnimationFrame(animateConfetti);
+	  } else {
+		scene.remove(confettiGroup);
+	  }
+	}
+  
+	requestAnimationFrame(animateConfetti);
+  }
+  
+  function checkAnswer(selected) {
 	const correctAnswer = 'red';
 	const feedback = document.getElementById('feedback');
   
@@ -424,8 +481,11 @@ function checkAnswer(selected) {
 	  feedback.textContent = 'Correct! 🎉';
 	  feedback.style.color = 'green';
   
-	  if (hero && typeof hero.celebrate === 'function') {
-		hero.celebrate(); // Cat does a little happy move!
+	  allowCatToPlay = true; // ✅ Enable ball interaction!
+  
+	  if (hero && typeof hero.clap === 'function') {
+		hero.clap();
+		hero.celebrate();
 	  } else {
 		console.log('Celebration triggered! 🎊');
 	  }
@@ -433,6 +493,8 @@ function checkAnswer(selected) {
 	} else {
 	  feedback.textContent = 'Nope! Try again.';
 	  feedback.style.color = 'red';
+	  allowCatToPlay = false; // 🔒 Disable interaction on wrong answer
 	}
   }
+  
   
