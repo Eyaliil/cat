@@ -1,6 +1,61 @@
 
 //THREEJS RELATED VARIABLES 
+var score = 0;
 
+var questions = [
+	{
+	  text: "What is the color of the wool ball?",
+	  answers: ["Blue", "Red", "Green"],
+	  correct: "red"
+	},
+	{
+	  text: "How many legs does the cat have?",
+	  answers: ["2", "4", "3"],
+	  correct: "4"
+	},
+	{
+	  text: "What shape is the cat's nose?",
+	  answers: ["Triangle", "Circle", "Square"],
+	  correct: "triangle"
+	}
+  ];
+  
+  var currentQuestionIndex = 0;
+  function showQuestion(index) {
+	const questionObj = questions[index];
+  
+	document.querySelector("#question-panel p").textContent = questionObj.text;
+  
+	const ul = document.querySelector("#question-panel ul");
+	ul.innerHTML = ""; // Clear existing buttons
+  
+	questionObj.answers.forEach(answer => {
+	  const li = document.createElement("li");
+	  const btn = document.createElement("button");
+	  btn.textContent = answer;
+	  btn.onclick = () => checkAnswer(answer.toLowerCase());
+	  li.appendChild(btn);
+	  ul.appendChild(li);
+	});
+  
+	document.getElementById("feedback").textContent = "";
+  }
+  function nextQuestion() {
+	if (currentQuestionIndex < questions.length - 1) {
+	  currentQuestionIndex++;
+	  showQuestion(currentQuestionIndex);
+	  allowCatToPlay = false;
+	}
+  }
+  
+  function prevQuestion() {
+	if (currentQuestionIndex > 0) {
+	  currentQuestionIndex--;
+	  showQuestion(currentQuestionIndex);
+	  allowCatToPlay = false;
+	}
+  }
+	  
 var scene,
     camera, fieldOfView, aspectRatio, nearPlane, farPlane,
     gobalLight, shadowLight, backLight,
@@ -472,29 +527,34 @@ function launchConfetti() {
   
 	requestAnimationFrame(animateConfetti);
   }
+  function updateScoreDisplay() {
+	document.getElementById('score-display').textContent = `⭐ Score: ${score}`;
+  }
   
   function checkAnswer(selected) {
-	const correctAnswer = 'red';
+	const correctAnswer = questions[currentQuestionIndex].correct.toLowerCase();
 	const feedback = document.getElementById('feedback');
   
-	if (selected === correctAnswer) {
+	if (selected === correctAnswer) { 
 	  feedback.textContent = 'Correct! 🎉';
 	  feedback.style.color = 'green';
-  
-	  allowCatToPlay = true; // ✅ Enable ball interaction!
+	  allowCatToPlay = true;
+	  score++;
+updateScoreDisplay();
+
   
 	  if (hero && typeof hero.clap === 'function') {
 		hero.clap();
 		hero.celebrate();
-	  } else {
-		console.log('Celebration triggered! 🎊');
 	  }
-  
 	} else {
 	  feedback.textContent = 'Nope! Try again.';
 	  feedback.style.color = 'red';
-	  allowCatToPlay = false; // 🔒 Disable interaction on wrong answer
+	  allowCatToPlay = false;
 	}
+
+	  
   }
+  
   
   
