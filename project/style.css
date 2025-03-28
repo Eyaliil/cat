@@ -114,3 +114,101 @@
   margin-top: 10px;
   font-weight: bold;
 }
+ #header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: #ffffffee;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-family: 'Open Sans', sans-serif;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
+  z-index: 1001;
+}
+
+#logo {
+  font-size: 1.6em;
+  font-weight: bold;
+  color: #328685;
+  letter-spacing: 1px;
+}
+
+#user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1em;
+  color: #333;
+  background-color: #ffe066; /* Yellow background */
+  padding: 8px 16px;
+  border-radius: 30px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  object-fit: cover;
+}
+
+#username {
+  font-weight: 700;
+  color: #5c4400;
+}
+
+#score-display {
+  font-weight: bold;
+  color: #5c4400;
+}
+#exercise-panel {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 400px;
+  margin: 40px auto;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  font-family: 'Open Sans', sans-serif;
+}
+
+#word-display {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 20px 0;
+}
+
+#exercise-panel button {
+  padding: 10px 20px;
+  font-size: 16px;
+  margin: 6px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #6ecccc;
+  color: white;
+}
+
+#exercise-panel button:hover {
+  background-color: #328685;
+}
+
+#speech-btn {
+  background-color: #ffcc00;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+#speech-btn:hover {
+  background-color: #ffdd33;
+}
+

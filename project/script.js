@@ -1,6 +1,7 @@
 
 //THREEJS RELATED VARIABLES 
 var score = 0;
+let currentMode = "mcq"; // or "speech"
 
 var questions = [
 	{
@@ -20,16 +21,27 @@ var questions = [
 	}
   ];
   
+  const speechQuestions = [
+	{
+	  text: "Say the shape of the cat's nose",
+	  correct: "triangle"
+	}
+  ];
+  
+  
   var currentQuestionIndex = 0;
   function showQuestion(index) {
-	const questionObj = questions[index];
+	const q = questions[index];
   
-	document.querySelector("#question-panel p").textContent = questionObj.text;
+	document.querySelector("#question-panel p").textContent = q.text;
   
 	const ul = document.querySelector("#question-panel ul");
-	ul.innerHTML = ""; // Clear existing buttons
+	ul.innerHTML = "";
   
-	questionObj.answers.forEach(answer => {
+	document.getElementById("speech-btn").style.display = "none";
+	document.getElementById("speech-result").textContent = "";
+  
+	q.answers.forEach(answer => {
 	  const li = document.createElement("li");
 	  const btn = document.createElement("button");
 	  btn.textContent = answer;
@@ -40,21 +52,43 @@ var questions = [
   
 	document.getElementById("feedback").textContent = "";
   }
+  
   function nextQuestion() {
-	if (currentQuestionIndex < questions.length - 1) {
-	  currentQuestionIndex++;
-	  showQuestion(currentQuestionIndex);
-	  allowCatToPlay = false;
+	if (currentMode === "mcq") {
+	  if (currentQuestionIndex < questions.length - 1) {
+		currentQuestionIndex++;
+		showQuestion(currentQuestionIndex);
+	  } else {
+		// Switch to speech mode
+		currentMode = "speech";
+		currentQuestionIndex = 0;
+		showSpeechQuestion(currentQuestionIndex);
+	  }
+	} else if (currentMode === "speech") {
+	  if (currentQuestionIndex < speechQuestions.length - 1) {
+		currentQuestionIndex++;
+		showSpeechQuestion(currentQuestionIndex);
+	  } else {
+		alert("🎉 You've completed all questions!");
+	  }
 	}
+  
+	allowCatToPlay = false;
   }
   
+  
   function prevQuestion() {
-	if (currentQuestionIndex > 0) {
+	if (currentMode === "mcq" && currentQuestionIndex > 0) {
 	  currentQuestionIndex--;
 	  showQuestion(currentQuestionIndex);
-	  allowCatToPlay = false;
+	} else if (currentMode === "speech" && currentQuestionIndex > 0) {
+	  currentQuestionIndex--;
+	  showSpeechQuestion(currentQuestionIndex);
 	}
+  
+	allowCatToPlay = false;
   }
+  
 	  
 var scene,
     camera, fieldOfView, aspectRatio, nearPlane, farPlane,
@@ -475,6 +509,9 @@ function init(event){
   createHero();
   createBall();
   loop();
+  showQuestion(currentQuestionIndex);
+  updateScoreDisplay();
+
 }
 
 function launchConfetti() {
@@ -528,9 +565,8 @@ function launchConfetti() {
 	requestAnimationFrame(animateConfetti);
   }
   function updateScoreDisplay() {
-	document.getElementById('score-display').textContent = `⭐ Score: ${score}`;
+	document.getElementById('score-display').textContent = `Score: ${score}`;
   }
-  
   function checkAnswer(selected) {
 	const correctAnswer = questions[currentQuestionIndex].correct.toLowerCase();
 	const feedback = document.getElementById('feedback');
@@ -540,8 +576,8 @@ function launchConfetti() {
 	  feedback.style.color = 'green';
 	  allowCatToPlay = true;
 	  score++;
-updateScoreDisplay();
-
+	  updateScoreDisplay();
+	  
   
 	  if (hero && typeof hero.clap === 'function') {
 		hero.clap();
@@ -555,6 +591,65 @@ updateScoreDisplay();
 
 	  
   }
+  function initSpeechRecognition(correctAnswer) {
+	const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+	const resultDisplay = document.getElementById("speech-result");
+  
+	if (!SpeechRecognition) {
+	  resultDisplay.textContent = "Speech recognition not supported 😞";
+	  return;
+	}
+  
+	const recognition = new SpeechRecognition();
+	recognition.lang = "en-US";
+	recognition.interimResults = false;
+	recognition.continuous = false;
+  
+	resultDisplay.textContent = "🎙 Listening...";
+  
+	recognition.onresult = (event) => {
+	  const spoken = event.results[0][0].transcript.trim().toLowerCase();
+	  resultDisplay.textContent = `You said: "${spoken}"`;
+  
+	  if (spoken === correctAnswer.toLowerCase()) {
+		resultDisplay.style.color = "green";
+		checkAnswer(correctAnswer); // 🎯 trigger correct flow
+	  } else {
+		resultDisplay.style.color = "red";
+		document.getElementById("feedback").textContent = "Nope! Try again.";
+	  }
+	};
+  
+	recognition.onerror = (event) => {
+	  resultDisplay.textContent = `Error: ${event.error}`;
+	  resultDisplay.style.color = "red";
+	};
+  
+	recognition.onend = () => {
+	  setTimeout(() => {
+		resultDisplay.textContent = "";
+	  }, 2000);
+	};
+  
+	recognition.start();
+  }
+  function showSpeechQuestion(index) {
+	const q = speechQuestions[index];
+  
+	document.querySelector("#question-panel p").textContent = q.text;
+  
+	// Hide MCQ buttons
+	const ul = document.querySelector("#question-panel ul");
+	ul.innerHTML = "";
+  
+	// Show speech button
+	document.getElementById("speech-btn").style.display = "inline-block";
+	document.getElementById("speech-result").textContent = "";
+	document.getElementById("feedback").textContent = "";
+  
+	document.getElementById("speech-btn").onclick = () => initSpeechRecognition(q.correct);
+  }
+  
   
   
   
