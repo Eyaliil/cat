@@ -267,6 +267,10 @@ THREE.OrbitControls = function ( object, domElement ) {
 	};
 
 	this.update = function () {
+		if (typeof hero !== "undefined" && hero.threeGroup) {
+			hero.threeGroup.scale.set(2, 2, 2); // Double the cat's size
+		}
+		
 
 		var position = this.object.position;
 

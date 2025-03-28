@@ -186,7 +186,7 @@ function initScreenAnd3D() {
   camera.position.x = 0;
   camera.position.z = 300;
   camera.position.y = 250;
-  camera.lookAt(new THREE.Vector3(0, -50, 0));
+  camera.lookAt(new THREE.Vector3(0, 40,0));
 
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setPixelRatio( window.devicePixelRatio );
@@ -252,11 +252,13 @@ function createFloor(){
 
 function createHero() {
   hero = new Cat();
+  hero.threeGroup.scale.set(1.5, 1.5, 1.5);
   scene.add(hero.threeGroup);
 }
 
 function createBall() {
   ball = new Ball();
+  ball.threeGroup.visible = false; 
   scene.add(ball.threeGroup);
 }
 
@@ -616,7 +618,6 @@ function launchConfetti() {
   }
 
 
-  //this
   function checkAnswer(selected) {
 	const correctAnswer = getCurrentCorrectAnswer().toLowerCase();
   
@@ -631,11 +632,16 @@ function launchConfetti() {
 		hero.celebrate();
 	  }
   
+	  if (ball) {
+		ball.threeGroup.visible = true; // 👈 Show the ball when answer is correct
+	  }
+  
 	} else {
 	  showFeedback('Nope! Try again.', false);
 	  allowCatToPlay = false;
 	}
   }
+  
   
 
   
@@ -653,6 +659,11 @@ function launchConfetti() {
 	document.getElementById("speech-result").textContent = "";
   
 	document.getElementById("speech-btn").onclick = () => initSpeechRecognition(q.correct);
+
+	if (ball) {
+		ball.threeGroup.visible = false;
+	  }
+	  
   }
   
   
@@ -664,5 +675,34 @@ function launchConfetti() {
 	  return speechQuestions[currentQuestionIndex].correct;
 	}
 	return "";
+  }
+  
+  function showQuestion(index) {
+	const q = questions[index];
+  
+	document.querySelector("#question-panel p").textContent = q.text;
+  
+	const ul = document.querySelector("#question-panel ul");
+	ul.innerHTML = "";
+  
+	document.getElementById("speech-btn").style.display = "none";
+	document.getElementById("speech-result").textContent = "";
+  
+	q.answers.forEach(answer => {
+	  const li = document.createElement("li");
+	  const btn = document.createElement("button");
+	  btn.textContent = answer;
+	  btn.onclick = () => checkAnswer(answer.toLowerCase());
+	  li.appendChild(btn);
+	  ul.appendChild(li);
+	});
+  
+	// Optional: hide feedback
+	document.getElementById("feedback").textContent = "";
+  
+	// 👇 Add this to hide the ball when a new question loads
+	if (ball) {
+	  ball.threeGroup.visible = false;
+	}
   }
   
