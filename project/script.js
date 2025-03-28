@@ -84,10 +84,17 @@ var questions = [
 	} else if (currentMode === "speech" && currentQuestionIndex > 0) {
 	  currentQuestionIndex--;
 	  showSpeechQuestion(currentQuestionIndex);
+	} else if (currentMode === "speech" && currentQuestionIndex === 0) {
+	  // 👇 Go back to last MCQ
+	  currentMode = "mcq";
+	  currentQuestionIndex = questions.length - 1;
+	  showQuestion(currentQuestionIndex);
 	}
   
 	allowCatToPlay = false;
   }
+  
+
   
 	  
 var scene,
@@ -568,16 +575,15 @@ function launchConfetti() {
 	document.getElementById('score-display').textContent = `Score: ${score}`;
   }
   function checkAnswer(selected) {
-	const correctAnswer = questions[currentQuestionIndex].correct.toLowerCase();
+	const correctAnswer = getCurrentCorrectAnswer(); // Handles both MCQ & speech
 	const feedback = document.getElementById('feedback');
   
-	if (selected === correctAnswer) { 
+	if (selected === correctAnswer.toLowerCase()) {
 	  feedback.textContent = 'Correct! 🎉';
 	  feedback.style.color = 'green';
 	  allowCatToPlay = true;
 	  score++;
 	  updateScoreDisplay();
-	  
   
 	  if (hero && typeof hero.clap === 'function') {
 		hero.clap();
@@ -588,9 +594,8 @@ function launchConfetti() {
 	  feedback.style.color = 'red';
 	  allowCatToPlay = false;
 	}
-
-	  
   }
+  
   function initSpeechRecognition(correctAnswer) {
 	const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 	const resultDisplay = document.getElementById("speech-result");
@@ -652,4 +657,12 @@ function launchConfetti() {
   
   
   
+  function getCurrentCorrectAnswer() {
+	if (currentMode === "mcq") {
+	  return questions[currentQuestionIndex].correct;
+	} else if (currentMode === "speech") {
+	  return speechQuestions[currentQuestionIndex].correct;
+	}
+	return "";
+  }
   
