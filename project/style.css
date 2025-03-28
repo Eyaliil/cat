@@ -41,7 +41,6 @@
   text-align: center;
 }
 
-
 #question-panel h3 {
   margin-top: 0;
 }
@@ -49,6 +48,48 @@
 #question-panel ul {
   list-style: none;
   padding: 0;
+}
+
+.navigation-controls {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+#prev-btn, #next-btn {
+    position: absolute;
+    bottom: 210px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #FFD700; /* Bright yellow */
+    border: 2px solid #DAA520; /* Golden border */
+    color: #8B4513; /* Dark brown text color */
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.2s ease;
+    pointer-events: auto;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
+
+#prev-btn:hover, #next-btn:hover {
+    transform: scale(1.1);
+    background-color: #FFF700; /* Slightly brighter yellow on hover */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+/* Fix positioning for each button */
+#prev-btn {
+    left: 100px;
+}
+
+#next-btn {
+    right: 100px;
 }
 
 #question-panel button {
