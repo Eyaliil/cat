@@ -27,3 +27,48 @@
 #credits a:hover {
   color:#630d15;
 }
+#question-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 250px;
+  height: 100%;
+  background-color: #ffffffcc;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+  padding: 20px;
+  font-family: 'Open Sans', sans-serif;
+  color: #333;
+  z-index: 10;
+}
+
+#question-panel h3 {
+  margin-top: 0;
+}
+
+#question-panel ul {
+  list-style: none;
+  padding: 0;
+}
+
+#question-panel button {
+  display: block;
+  margin: 8px 0;
+  padding: 10px;
+  width: 100%;
+  font-size: 1em;
+  background-color: #6ecccc;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#question-panel button:hover {
+  background-color: #328685;
+}
+
+#feedback {
+  margin-top: 10px;
+  font-weight: bold;
+}

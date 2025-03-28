@@ -415,3 +415,24 @@ function init(event){
   createBall();
   loop();
 }
+
+function checkAnswer(selected) {
+	const correctAnswer = 'red';
+	const feedback = document.getElementById('feedback');
+  
+	if (selected === correctAnswer) {
+	  feedback.textContent = 'Correct! 🎉';
+	  feedback.style.color = 'green';
+  
+	  if (hero && typeof hero.celebrate === 'function') {
+		hero.celebrate(); // Cat does a little happy move!
+	  } else {
+		console.log('Celebration triggered! 🎊');
+	  }
+  
+	} else {
+	  feedback.textContent = 'Nope! Try again.';
+	  feedback.style.color = 'red';
+	}
+  }
+  

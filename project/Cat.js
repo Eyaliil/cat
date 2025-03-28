@@ -516,6 +516,12 @@ Cat = function(){
       object.receiveShadow = true;
     }
   } );
+
+  Cat.prototype.celebrate = function() {
+    const tl = new TimelineMax();
+    tl.to(this.threeGroup.rotation, 0.2, { y: "+=0.5", repeat: 3, yoyo: true });
+  };
+  
 }
 
 Cat.prototype.updateTail = function(t){
